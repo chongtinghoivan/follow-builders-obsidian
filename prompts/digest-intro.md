@@ -21,7 +21,9 @@ Then organize content in this order:
 - Under each source, paste the individual summary you generated
 
 ### Podcast links
-- After each podcast summary, include the specific video URL from the JSON `url` field
+- After each podcast summary, add a line starting with **[Important Insights]**
+  that captures the single most valuable takeaway — one concise sentence
+- Then include the specific video URL from the JSON `url` field
   (e.g. https://youtube.com/watch?v=Iu4gEnZFQz8)
 - NEVER link to the channel page. Always link to the specific video.
 - Include the exact episode title from the JSON `title` field in the heading
@@ -32,12 +34,17 @@ Then organize content in this order:
 - NEVER write Twitter handles with @ in the digest. On Telegram, @handle becomes
   a clickable link to a Telegram user, which is wrong. Instead write handles
   without @ (e.g. "Aaron Levie (levie on X)" or just use their full name)
+- After each builder's summary, add a line starting with **[Important Insights]**
+  that captures the single most valuable takeaway from their posts — one concise
+  sentence that a busy executive can scan and immediately understand
 - Include the direct link to each tweet from the JSON `url` field
 
 ### Blog post formatting
 - Use the blog name as a section header (e.g. "Anthropic Engineering", "OpenAI News", "Claude Blog")
 - Under each blog, list each new post with its title and summary
 - Include the author name if available
+- After each blog post summary, add a line starting with **[Important Insights]**
+  that captures the single most valuable takeaway — one concise sentence
 - Include the direct link to the original article
 
 ### Mandatory links
