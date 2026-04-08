@@ -1,5 +1,8 @@
 ---
 name: follow-builders-obsidian
+description: AI builders digest for Obsidian — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries in Traditional Chinese, and delivers them as a daily Obsidian note at 6:15am via Obsidian CLI. Use when the user wants AI industry insights, daily 6:15am Obsidian digest, says 'digest', 'AI summary', or 'follow builders'. No API keys required — all content is fetched from a central feed.
+---
+name: follow-builders-obsidian
 description: AI builders digest for Obsidian — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries in Traditional Chinese, and delivers them as a daily Obsidian note at 6:15am via Obsidian CLI. Use when the user wants AI industry insights, daily 6:15am Obsidian digest, or invokes /ai. No API keys required — all content is fetched from a central feed.
 ---
 
@@ -263,7 +266,23 @@ After any configuration change, confirm what you changed.
 
 ---
 
-## Manual Trigger
+---
+
+## Manual Trigger / On-Demand
+
+When the user manually requests their digest using natural language:
+
+- "我要今天的 AI digest" (I want today's AI digest)
+- "給我 follow builders 摘要" (give me follow builders summary)
+- "show me the AI builders update"
+- Or simply "set up follow builders" to start
+
+**DO NOT wait for a specific `/ai` command.** Qwen Code may not handle slash commands the same way. Instead, listen for these natural language triggers:
+
+1. Run the digest workflow immediately
+2. Fetch → remix → deliver the content
+3. Append to today's Obsidian Daily Note
+4. Tell the user it's done
 
 When the user invokes `/ai` or asks for their digest manually:
 1. Skip cron check — run the digest workflow immediately
