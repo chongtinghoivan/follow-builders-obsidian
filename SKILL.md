@@ -95,7 +95,21 @@ cat > ~/.follow-builders/config.json << 'CFGEOF'
 CFGEOF
 ```
 
-### Step 7: Set Up Cron at 6:15am
+### Step 7: Set Up Cron at 6:15am (Hong Kong Time)
+
+Set up the scheduled cron job to create a daily Obsidian note at 6:15am Hong Kong Time:
+
+**Hong Kong Time is UTC+8**, so 6:15am HK = 22:15 (10:15pm) UTC the previous day.
+
+```bash
+SKILL_DIR="<absolute path to the skill directory>"
+VAULT_PATH="<user's vault path>"
+# Cron at 6:15am Hong Kong Time = 22:15 UTC previous day
+CRON_CMD="15 22 * * * cd $SKILL_DIR/scripts && node prepare-digest.js 2>/dev/null | node deliver.js --method obsidian --vault '$VAULT_PATH' 2>/dev/null"
+(crontab -l 2>/dev/null; echo "$CRON_CMD") | crontab -
+```
+
+Tell the user: "排程任務已設定。每天早上6:15（香港時間），我會自動在您的 Obsidian Vault 創建 Daily Note，包含最新的 AI Builders 摘要。"
 
 Set up the scheduled cron job to create a daily Obsidian note at 6:15am:
 
