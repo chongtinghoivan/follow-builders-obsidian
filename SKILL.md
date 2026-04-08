@@ -246,7 +246,7 @@ When the user says something that sounds like a settings change, handle it:
 
 ### Source Changes
 The source list is managed centrally and cannot be modified by users.
-If a user asks to add or remove sources, tell them: "來源名單由中央統一維護並自動更新。如果您想建議新增來源，可以在此反饋：https://github.com/chongtinghoivan/follow-builders-obsidian"
+If a user asks to add or remove sources, tell them: "來源名單由中央統一維護並自動更新。如果您想建議新增來源，可以在此反饋：https://github.com/zarazhangrui/follow-builders"
 
 ### Schedule Changes
 - "改時間為早上七點" → Update `deliveryTime` in config.json, also update the cron job

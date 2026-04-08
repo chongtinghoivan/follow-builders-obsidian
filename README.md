@@ -100,6 +100,23 @@ cd ~/.qwen/skills/follow-builders-obsidian/scripts && npm install
 
 Then say "set up follow builders" to your Qwen agent.
 
+> **Note:** Feed content (tweets, podcasts, blogs) is sourced from
+> [zarazhangrui/follow-builders](https://github.com/zarazhangrui/follow-builders).
+> This repo provides the Obsidian delivery layer and summarization prompts only.
+
+---
+
+## Requirements
+
+- Qwen Code (or similar AI agent)
+- Obsidian with the "Daily notes" core plugin enabled
+- Obsidian CLI installed (`npm install -g obsidian-cli` or via other means)
+- Internet connection (to fetch the central feed)
+- macOS or Linux (for cron-based scheduling)
+
+That's it. No API keys needed. All content (blog articles + YouTube transcripts + X/Twitter posts)
+is fetched centrally and updated daily.
+
 ---
 
 ## How Obsidian Delivery Works
@@ -161,10 +178,10 @@ These are plain English instructions, not code. Changes take effect on the next 
 
 ## How It Works
 
-1. A central feed is updated daily with the latest content from all sources
+1. The upstream feed repo ([zarazhangrui/follow-builders](https://github.com/zarazhangrui/follow-builders)) is updated daily with the latest content from all sources
    (blog articles via web scraping, YouTube transcripts via Supadata, X/Twitter via official API)
 2. At 6:15am, a cron job on your machine triggers the digest pipeline
-3. Your agent's skill fetchs the feed — one HTTP request, no API keys
+3. `prepare-digest.js` fetches the feed — one HTTP request, no API keys
 4. The content is remixed into a digestible summary in Traditional Chinese
 5. Obsidian CLI appends to today's Daily Note with the digest
 6. The note appears in your Obsidian vault automatically

@@ -62,5 +62,5 @@ Then organize content in this order:
 - If you have nothing real for a builder, skip them entirely
 
 ### General
-- At the very end, add a line: "Generated through the Follow Builders skill: https://github.com/chongtinghoivan/follow-builders-obsidian"
+- At the very end, add a line: "Generated through the Follow Builders skill: https://github.com/zarazhangrui/follow-builders"
 - Keep formatting clean and scannable — this will be read on a phone screen
