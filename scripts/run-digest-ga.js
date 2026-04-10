@@ -347,34 +347,54 @@ async function main() {
     console.error(`Calling native Gemini API: ${url} (model: ${model})`);
   }
 
-  // 3. Call the API
-  const res = await fetch(url, {
-    method: 'POST',
-    headers,
-    body
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error(`API error (${res.status}): ${errText}`);
-    process.exit(1);
-  }
-
-  const json = await res.json();
-
-  // Extract response based on API format
+  // 3. Call the API with retries
   let digest;
-  if (isProxy) {
-    // OpenAI-compatible response format
-    digest = json.choices[0].message.content;
-  } else {
-    // Native Gemini response format
-    digest = json.candidates[0].content.parts[0].text;
+  const maxRetries = 3;
+  let lastError;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    if (attempt > 1) {
+      const delayMs = attempt * 3000;
+      console.error(`Retry attempt ${attempt}/${maxRetries} after ${delayMs}ms delay...`);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+
+    const res = await fetch(url, {
+      method: 'POST',
+      headers,
+      body
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      lastError = `API error (${res.status}): ${errText}`;
+      console.error(`Attempt ${attempt}/${maxRetries} failed: ${lastError}`);
+      // Don't retry on auth/400 errors — only retry on 5xx
+      if (res.status < 500) {
+        console.error(`Non-retryable error (status ${res.status})`);
+        process.exit(1);
+      }
+      continue;
+    }
+
+    const json = await res.json();
+
+    // Extract response based on API format
+    if (isProxy) {
+      digest = json.choices?.[0]?.message?.content;
+    } else {
+      digest = json.candidates?.[0]?.content?.parts?.[0]?.text;
+    }
+
+    if (digest) break;
+
+    lastError = 'No content in API response';
+    console.error('Attempt ${attempt}/${maxRetries}: No content in response');
+    console.error(JSON.stringify(json, null, 2));
   }
 
   if (!digest) {
-    console.error('ERROR: No content in API response');
-    console.error(JSON.stringify(json, null, 2));
+    console.error(`All ${maxRetries} attempts failed. Last error: ${lastError}`);
     process.exit(1);
   }
 
