@@ -133,25 +133,35 @@ You are summarizing a blog post from an AI company for a busy professional.
   // Language-specific prompts — selected at runtime based on DIGEST_LANGUAGE
   translate_bilingual: `# Bilingual Translation Prompt
 
-You are producing a BILINGUAL AI industry digest in English AND Traditional Chinese (繁體中文).
+You are producing a BILINGUAL AI industry digest. EVERY single section MUST have BOTH English AND Traditional Chinese (繁體中文).
 
-## Instructions
+## CRITICAL RULES
 
-- The output MUST be bilingual — EVERY section MUST have both English and Traditional Chinese versions
-- For each builder's summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
-- For each podcast summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
-- For each blog summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
-- Do NOT output all English first then all Chinese — interleave them section by section
+1. EVERY builder summary MUST have: English paragraph, then blank line, then Traditional Chinese paragraph
+2. EVERY podcast summary MUST have: English paragraph, then blank line, then Traditional Chinese paragraph
+3. EVERY blog summary MUST have: English paragraph, then blank line, then Traditional Chinese paragraph
+4. The **[Important Insights]** line MUST be: English text, then space, then Traditional Chinese in parentheses
+
+## Format Example (FOLLOW THIS EXACTLY):
+
+### Josh Woodward (VP, Google)
+
+English summary paragraph here with key points and details...
+
+中文摘要段落，翻譯上面的英文內容，使用流暢的繁體中文...
+
+**[Important Insights]** Key takeaway in English. (中文重點摘要)
+https://x.com/handle/status/123
+
+## Translation Rules
+
 - The Traditional Chinese version must sound natural and fluent — like it was originally written in Chinese, not translated
-- Keep technical terms in English where Chinese professionals typically use them:
-  AI, LLM, GPU, API, fine-tuning, RAG, token, prompt, agent, transformer, etc.
+- Keep technical terms in English: AI, LLM, GPU, API, fine-tuning, RAG, token, prompt, agent, transformer, etc.
 - Keep all proper nouns in English: names of people, companies, products, tools
 - Keep all URLs unchanged
-- Maintain the same structure and formatting
-- The tone should be professional but conversational — 像是一位懂行的朋友在跟你聊天
 - Never use em-dashes
 - Use Traditional Chinese characters (Taiwan/Hong Kong style)
-- **[Important Insights]** lines should also be bilingual: English first, then Traditional Chinese in parentheses`,
+- The tone should be professional but conversational — 像是一位懂行的朋友在跟你聊天`,
 
   translate_zh: `# Translation Prompt
 
@@ -187,7 +197,7 @@ function buildSystemPrompt(lang) {
     ? 'OUTPUT the digest in English Markdown format.'
     : lang === 'zh'
     ? 'OUTPUT ONLY the final Traditional Chinese digest in Markdown format.'
-    : 'OUTPUT ONLY the final bilingual digest in Markdown format.\nEvery section MUST have both English and Traditional Chinese versions.';
+    : 'OUTPUT ONLY the final bilingual digest in Markdown format.\n\nCRITICAL: Every single section MUST have BOTH an English version AND a Traditional Chinese version.\nFor each builder/podcast/blog: write the English paragraph, then a blank line, then the Traditional Chinese translation.\nNEVER output English-only content. NEVER output Chinese-only content. ALWAYS provide BOTH.\nDo NOT put all English first then all Chinese — they must be interleaved section by section.';
 
   return `You are an expert AI content curator. You will receive JSON data containing
 tweets, podcast transcripts, and blog posts from AI builders.
