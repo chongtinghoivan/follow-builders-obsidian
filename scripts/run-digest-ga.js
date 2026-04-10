@@ -5,11 +5,17 @@
 // ============================================================================
 // This script runs INSIDE GitHub Actions. It:
 // 1. Reads the prepared digest data JSON (from prepare-digest.js)
-// 2. Calls OpenAI API to remix + translate the content
+// 2. Calls Google Gemini API (via optional proxy) to remix + translate
 // 3. Outputs the final digest Markdown to stdout
 //
 // Usage: node run-digest-ga.js /path/to/digest-data.json
 // Output: Markdown to stdout
+//
+// Environment variables:
+//   GEMINI_API_KEY  — required
+//   GEMINI_API_HOST — optional, proxy URL (e.g. https://your-proxy.vercel.app)
+//                     defaults to https://generativelanguage.googleapis.com
+//   GEMINI_MODEL    — optional, defaults to gemini-2.5-flash
 // ============================================================================
 
 import { readFile } from 'fs/promises';
@@ -247,41 +253,88 @@ async function main() {
     return;
   }
 
-  // 2. Build OpenAI API request
-  const apiKey = process.env.OPENAI_API_KEY;
+  // 2. Validate Gemini API config
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.error('ERROR: OPENAI_API_KEY environment variable is required');
+    console.error('ERROR: GEMINI_API_KEY environment variable is required');
     process.exit(1);
   }
 
-  const messages = [
-    { role: 'system', content: buildSystemPrompt() },
-    { role: 'user', content: buildUserPrompt(data) }
-  ];
+  // Support both OpenAI-compatible endpoint (for Vercel proxies) and native Gemini
+  const apiHost = process.env.GEMINI_API_HOST || 'https://generativelanguage.googleapis.com';
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-  // 3. Call OpenAI API
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
+  // Detect if this is an OpenAI-compatible endpoint (most Vercel proxies are)
+  const isProxy = apiHost !== 'https://generativelanguage.googleapis.com';
+
+  let url, headers, body;
+
+  if (isProxy) {
+    // OpenAI-compatible endpoint (Vercel proxy)
+    url = `${apiHost.replace(/\/$/, '')}/v1/chat/completions`;
+    headers = {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages,
+    };
+    body = JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: buildSystemPrompt() },
+        { role: 'user', content: buildUserPrompt(data) }
+      ],
       temperature: 0.7,
       max_tokens: 8000
-    })
+    });
+    console.error(`Calling OpenAI-compatible endpoint: ${url} (model: ${model})`);
+  } else {
+    // Native Gemini API
+    url = `${apiHost.replace(/\/$/, '')}/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    headers = { 'Content-Type': 'application/json' };
+    body = JSON.stringify({
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: buildSystemPrompt() + '\n\n---\n\n' + buildUserPrompt(data) }]
+        }
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 8000
+      }
+    });
+    console.error(`Calling native Gemini API: ${url} (model: ${model})`);
+  }
+
+  // 3. Call the API
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body
   });
 
   if (!res.ok) {
     const errText = await res.text();
-    console.error(`OpenAI API error (${res.status}): ${errText}`);
+    console.error(`API error (${res.status}): ${errText}`);
     process.exit(1);
   }
 
   const json = await res.json();
-  const digest = json.choices[0].message.content;
+
+  // Extract response based on API format
+  let digest;
+  if (isProxy) {
+    // OpenAI-compatible response format
+    digest = json.choices[0].message.content;
+  } else {
+    // Native Gemini response format
+    digest = json.candidates[0].content.parts[0].text;
+  }
+
+  if (!digest) {
+    console.error('ERROR: No content in API response');
+    console.error(JSON.stringify(json, null, 2));
+    process.exit(1);
+  }
 
   // 4. Output
   console.log(digest);
