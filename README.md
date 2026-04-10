@@ -35,7 +35,7 @@ when you're back online, and the digest is waiting for you.
 
 The agent will guide you through setup. Your first digest arrives immediately after.
 
-**One API key needed:** `OPENAI_API_KEY` as a GitHub repo secret on your `obsidian-vault` repo.
+**One free API key needed:** `GEMINI_API_KEY` as a GitHub repo secret on your `obsidian-vault` repo. Get it free from [Google AI Studio](https://aistudio.google.com/apikey) — no credit card required.
 
 ---
 
@@ -56,14 +56,19 @@ Obsidian's "Daily notes" core plugin creates notes like `2026-04-08.md`:
 
 You should see a new file like `2026-04-08.md` in your vault.
 
-### 2. Add OPENAI_API_KEY to GitHub Secrets
+### 2. Add GEMINI_API_KEY to GitHub Secrets
 
-The GitHub Actions workflow needs your OpenAI API key to generate digests:
+The GitHub Actions workflow uses the **Google Gemini API** to generate digests.
+Many Gemini models (including `gemini-2.5-flash-lite`, the default) are **completely free** — no credit card required.
 
-1. Go to your repo: **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Name: `OPENAI_API_KEY`, Value: your OpenAI API key
-4. Save
+1. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+2. Go to your repo: **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+4. Name: `GEMINI_API_KEY`, Value: paste your Gemini API key
+5. Save
+
+> **No cost:** The default model `gemini-2.5-flash-lite` has a generous free tier.
+> You do **not** need to pay anything to run the daily digest.
 
 ### 3. GitHub Actions Workflow (Automatic)
 
@@ -96,7 +101,7 @@ Then say "set up follow builders" to your Qwen agent.
 - Qwen Code (or similar AI agent)
 - Obsidian with the "Daily notes" core plugin enabled
 - GitHub repo for your Obsidian vault (for Actions workflow)
-- `OPENAI_API_KEY` as a GitHub repo secret
+- **Google Gemini API key** (free — no credit card needed)
 - Internet connection (for `git pull` when you want to sync digests)
 
 That's it. All content (blog articles + YouTube transcripts + X/Twitter posts)
@@ -182,7 +187,7 @@ See [examples/sample-digest.md](examples/sample-digest.md) for what the output l
 - Your configuration, preferences, and reading history stay on your machine
 - The skill only reads public content (public blog posts, public YouTube videos, public X posts)
 - The GitHub Action runs on GitHub's infrastructure — no external scheduling service
-- The `OPENAI_API_KEY` secret is stored securely in your GitHub repo settings
+- The `GEMINI_API_KEY` secret is stored securely in your GitHub repo settings
 
 ## License
 

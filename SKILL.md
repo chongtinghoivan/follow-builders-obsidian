@@ -1,6 +1,6 @@
 ---
 name: follow-builders-obsidian
-description: AI builders digest for Obsidian — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries in Traditional Chinese, and delivers them as a daily Obsidian note at 6:15am via GitHub Actions. Use when the user wants AI industry insights, daily 6:15am Obsidian digest, or invokes /ai. No API keys required — all content is fetched from a central feed.
+description: AI builders digest for Obsidian — monitors top AI builders on X and YouTube podcasts, remixes their content into digestible summaries in Traditional Chinese, and delivers them as a daily Obsidian note at 6:15am via GitHub Actions. Uses Google Gemini API (free tier available).
 ---
 
 # Follow Builders, Not Influencers (Obsidian Edition)
@@ -17,9 +17,10 @@ Obsidian vault repository. The user's MacBook only needs to `git pull` when onli
 no dependency on local internet connectivity at cron time. This handles scenarios where
 the MacBook is sleeping, offline, or has intermittent WiFi.
 
-**One API key required:** `OPENAI_API_KEY` must be set as a repository secret on
+**One API key required:** `GEMINI_API_KEY` must be set as a repository secret on
 the `obsidian-vault` GitHub repo. This is used by the GitHub Action to call the
-OpenAI API for content summarization and translation.
+Google Gemini API for content summarization and translation. The default model
+(`gemini-2.5-flash-lite`) is **free** — no credit card or billing required.
 
 ---
 
@@ -115,19 +116,21 @@ Tell the user: "排程任務已設定。每天早上6:15（香港時間），Git
 **Setup steps:**
 
 1. Ensure the vault repo has the workflow file at `.github/workflows/daily-digest.yml`
-2. Add `OPENAI_API_KEY` as a repository secret on GitHub:
+2. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com/apikey)
+3. Add `GEMINI_API_KEY` as a repository secret on GitHub:
    - Go to https://github.com/chongtinghoivan/obsidian-vault/settings/secrets/actions
-   - Add secret `OPENAI_API_KEY` with your OpenAI API key
-3. The workflow runs at `15 22 * * *` UTC = 6:15am HKT daily
-4. It can also be manually triggered via GitHub Actions UI
+   - Add secret `GEMINI_API_KEY` with the value from step 2
+   - (Optional) Add `GEMINI_API_HOST` if using a proxy for Hong Kong access
+4. The workflow runs at `15 22 * * *` UTC = 6:15am HKT daily
+5. It can also be manually triggered via GitHub Actions UI
 
 **NO local cron needed.** The GitHub Action:
 - Fetches the latest content feeds from the central repo
-- Calls OpenAI API to summarize and translate to Traditional Chinese
+- Calls Google Gemini API to summarize and translate to Traditional Chinese
 - Commits the digest to `AI News Daily/YYYY-MM-DD.md` and `YYYY-MM-DD.md`
 - Pushes to the vault repo
 
-Tell the user: "您需要在 GitHub 倉庫設定中添加 OPENAI_API_KEY secret。我會在設定完成後立即生成第一份摘要。"
+Tell the user: "您需要在 GitHub 倉庫設定中添加 GEMINI_API_KEY secret（免費，從 Google AI Studio 取得）。我會在設定完成後立即生成第一份摘要。"
 
 ### Step 8: Welcome Digest
 
