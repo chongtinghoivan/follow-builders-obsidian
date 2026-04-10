@@ -13,7 +13,7 @@ influencers who regurgitate information.
 
 ## What You Get
 
-A daily digest at 6:15am in your Obsidian Vault (via the "Daily notes" core plugin) with:
+A daily digest at **6:15am HKT** delivered to your Obsidian Vault via **GitHub Actions**:
 
 - Summaries of new podcast episodes from top AI podcasts
 - Key posts and insights from 25 curated AI builders on X/Twitter
@@ -21,18 +21,21 @@ A daily digest at 6:15am in your Obsidian Vault (via the "Daily notes" core plug
 - Links to all original content
 - Available in Traditional Chinese (繁體中文)
 
+**Why GitHub Actions?** Your MacBook might be sleeping or offline at 6:15am. GitHub
+Actions runs on GitHub' infrastructure — always online. You just `git pull` your vault
+when you're back online, and the digest is waiting for you.
+
 ---
 
 ## Quick Start
 
 1. **Enable Daily Notes** in Obsidian (see Prerequisites below)
-2. **Install Obsidian CLI** (see Prerequisites below)
-3. Install the skill in your Qwen Code agent
-4. Say "set up follow builders" or invoke `/ai`
+2. Install the skill in your Qwen Code agent
+3. Say "set up follow builders" or invoke `/ai`
 
-The agent will ask for your vault path and set up the daily cron automatically.
+The agent will guide you through setup. Your first digest arrives immediately after.
 
-No API keys needed. Your first digest arrives immediately after setup.
+**One API key needed:** `OPENAI_API_KEY` as a GitHub repo secret on your `obsidian-vault` repo.
 
 ---
 
@@ -53,39 +56,21 @@ Obsidian's "Daily notes" core plugin creates notes like `2026-04-08.md`:
 
 You should see a new file like `2026-04-08.md` in your vault.
 
-### 2. Install Obsidian CLI
+### 2. Add OPENAI_API_KEY to GitHub Secrets
 
-```bash
-# Install via npm (recommended)
-npm install -g obsidian-cli
+The GitHub Actions workflow needs your OpenAI API key to generate digests:
 
-# Verify installation
-which obsidian
-obsidian --help
-```
+1. Go to your repo: **Settings** → **Secrets and variables** → **Actions**
+2. Click **New repository secret**
+3. Name: `OPENAI_API_KEY`, Value: your OpenAI API key
+4. Save
 
-**Test it works:**
-```bash
-obsidian daily:path
-# Should return: /path/to/your-vault/2026-04-08.md
-```
+### 3. GitHub Actions Workflow (Automatic)
 
-### 3. Set Up Cron (Optional - Done Automatically During Setup)
+The workflow file `.github/workflows/daily-digest.yml` is included in your vault repo.
+It runs daily at 6:15am HKT (22:15 UTC). No local cron needed.
 
-The skill can set up cron for you during onboarding. If you want to set it up manually:
-
-```bash
-# Your vault path (replace with your actual vault path)
-VAULT_PATH="/path/to/your-obsidian-vault"
-
-# Hong Kong Time 6:15am = UTC 22:15 (previous day)
-(crontab -l 2>/dev/null; echo "15 22 * * * cd ~/.qwen/skills/follow-builders-obsidian/scripts && node prepare-digest.js 2>/dev/null | node deliver.js --method obsidian --vault '$VAULT_PATH' 2>/dev/null") | crontab -
-```
-
-**Verify cron is set:**
-```bash
-crontab -l | grep follow
-```
+**To trigger manually:** Go to **Actions** → **Daily AI Builders Digest** → **Run workflow**
 
 ---
 
@@ -110,29 +95,32 @@ Then say "set up follow builders" to your Qwen agent.
 
 - Qwen Code (or similar AI agent)
 - Obsidian with the "Daily notes" core plugin enabled
-- Obsidian CLI installed (`npm install -g obsidian-cli` or via other means)
-- Internet connection (to fetch the central feed)
-- macOS or Linux (for cron-based scheduling)
+- GitHub repo for your Obsidian vault (for Actions workflow)
+- `OPENAI_API_KEY` as a GitHub repo secret
+- Internet connection (for `git pull` when you want to sync digests)
 
-That's it. No API keys needed. All content (blog articles + YouTube transcripts + X/Twitter posts)
-is fetched centrally and updated daily.
+That's it. All content (blog articles + YouTube transcripts + X/Twitter posts)
+is fetched centrally by the GitHub Action and updated daily.
 
 ---
 
-## How Obsidian Delivery Works
+## How GitHub Actions Delivery Works
 
-At 6:15am daily, a cron job runs locally on your machine:
+At 6:15am HKT daily, a GitHub Actions workflow runs on GitHub's infrastructure:
 
-1. Fetches the latest AI builder content from the central feed
-2. Remixes it into a digestible summary in Traditional Chinese
-3. Uses **Obsidian CLI** (`obsidian daily:append`) to append to today's Daily Note
-4. The note appears in your Obsidian app under today's date
+1. Clones the follow-builders-obsidian skill repo
+2. Fetches the latest AI builder content from the central feed
+3. Calls OpenAI API to remix and translate to Traditional Chinese
+4. Commits the digest to `AI News Daily/YYYY-MM-DD.md` and `YYYY-MM-DD.md`
+5. Pushes to your vault repo
+
+When your MacBook comes back online, just `git pull` your vault and the digest is waiting.
 
 ## Changing Settings
 
 Your delivery preferences are configurable through conversation. Just tell your agent:
 
-- "Change delivery time to 7am"
+- "Change delivery time to 7am" (updates the cron schedule in the workflow)
 - "Change my vault path to /path/to/vault"
 - "Make the summaries more concise"
 - "Show me my current settings"
@@ -180,11 +168,11 @@ These are plain English instructions, not code. Changes take effect on the next 
 
 1. The upstream feed repo ([zarazhangrui/follow-builders](https://github.com/zarazhangrui/follow-builders)) is updated daily with the latest content from all sources
    (blog articles via web scraping, YouTube transcripts via Supadata, X/Twitter via official API)
-2. At 6:15am, a cron job on your machine triggers the digest pipeline
+2. At 6:15am HKT, a **GitHub Actions workflow** on your `obsidian-vault` repo triggers the digest pipeline
 3. `prepare-digest.js` fetches the feed — one HTTP request, no API keys
-4. The content is remixed into a digestible summary in Traditional Chinese
-5. Obsidian CLI appends to today's Daily Note with the digest
-6. The note appears in your Obsidian vault automatically
+4. `run-digest-ga.js` calls OpenAI API to remix and translate the content
+5. The digest is committed to `AI News Daily/YYYY-MM-DD.md` and `YYYY-MM-DD.md` in your vault repo
+6. When your MacBook is online, `git pull` brings the digest into your vault
 
 See [examples/sample-digest.md](examples/sample-digest.md) for what the output looks like.
 
@@ -193,7 +181,8 @@ See [examples/sample-digest.md](examples/sample-digest.md) for what the output l
 - No API keys are sent anywhere — all content is fetched centrally
 - Your configuration, preferences, and reading history stay on your machine
 - The skill only reads public content (public blog posts, public YouTube videos, public X posts)
-- The cron job runs locally on your machine — no external scheduling service
+- The GitHub Action runs on GitHub's infrastructure — no external scheduling service
+- The `OPENAI_API_KEY` secret is stored securely in your GitHub repo settings
 
 ## License
 
