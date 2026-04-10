@@ -130,7 +130,30 @@ You are summarizing a blog post from an AI company for a busy professional.
 - Include specific technical details, architectural decisions, and design rationale
 - Include the direct link to the original article`,
 
-  translate: `# Translation Prompt
+  // Language-specific prompts — selected at runtime based on DIGEST_LANGUAGE
+  translate_bilingual: `# Bilingual Translation Prompt
+
+You are producing a BILINGUAL AI industry digest in English AND Traditional Chinese (繁體中文).
+
+## Instructions
+
+- The output MUST be bilingual — EVERY section MUST have both English and Traditional Chinese versions
+- For each builder's summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
+- For each podcast summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
+- For each blog summary: write the English version first, then the Traditional Chinese translation directly below (separated by a blank line)
+- Do NOT output all English first then all Chinese — interleave them section by section
+- The Traditional Chinese version must sound natural and fluent — like it was originally written in Chinese, not translated
+- Keep technical terms in English where Chinese professionals typically use them:
+  AI, LLM, GPU, API, fine-tuning, RAG, token, prompt, agent, transformer, etc.
+- Keep all proper nouns in English: names of people, companies, products, tools
+- Keep all URLs unchanged
+- Maintain the same structure and formatting
+- The tone should be professional but conversational — 像是一位懂行的朋友在跟你聊天
+- Never use em-dashes
+- Use Traditional Chinese characters (Taiwan/Hong Kong style)
+- **[Important Insights]** lines should also be bilingual: English first, then Traditional Chinese in parentheses`,
+
+  translate_zh: `# Translation Prompt
 
 You are translating an AI industry digest from English to Traditional Chinese (繁體中文).
 
@@ -142,15 +165,30 @@ You are translating an AI industry digest from English to Traditional Chinese (�
   AI, LLM, GPU, API, fine-tuning, RAG, token, prompt, agent, transformer, etc.
 - Keep all proper nouns in English: names of people, companies, products, tools
 - Keep all URLs unchanged
-- Maintain the same structure and formatting as the English version
+- Maintain the same structure and formatting
 - The tone should be professional but conversational — 像是一位懂行的朋友在跟你聊天
 - Never use em-dashes
-- Use Traditional Chinese characters (Taiwan/Hong Kong style)`
+- Use Traditional Chinese characters (Taiwan/Hong Kong style)`,
+
+  translate_en: `You are writing an AI industry digest in English. No translation needed.`
 };
 
 // -- Build the system prompt -------------------------------------------------
 
-function buildSystemPrompt() {
+function buildSystemPrompt(lang) {
+  const translateKey = lang === 'en' ? 'translate_en' : lang === 'zh' ? 'translate_zh' : 'translate_bilingual';
+  const translatePrompt = PROMPTS[translateKey];
+
+  const step2Label = lang === 'en' ? 'STEP 2 — OUTPUT (English):'
+    : lang === 'zh' ? 'STEP 2 — TRANSLATE to Traditional Chinese:'
+    : 'STEP 2 — BILINGUAL OUTPUT (English + Traditional Chinese):';
+
+  const outputInstruction = lang === 'en'
+    ? 'OUTPUT the digest in English Markdown format.'
+    : lang === 'zh'
+    ? 'OUTPUT ONLY the final Traditional Chinese digest in Markdown format.'
+    : 'OUTPUT ONLY the final bilingual digest in Markdown format.\nEvery section MUST have both English and Traditional Chinese versions.';
+
   return `You are an expert AI content curator. You will receive JSON data containing
 tweets, podcast transcripts, and blog posts from AI builders.
 
@@ -171,10 +209,10 @@ ${PROMPTS.summarize_blogs}
 === ASSEMBLY ===
 ${PROMPTS.digest_intro}
 
-STEP 2 — TRANSLATE to Traditional Chinese:
-${PROMPTS.translate}
+${step2Label}
+${translatePrompt}
 
-OUTPUT ONLY the final Traditional Chinese digest in Markdown format.
+${outputInstruction}
 Do NOT include any preamble, explanation, or commentary.
 Do NOT wrap the output in code blocks.`;
 }
@@ -260,6 +298,10 @@ async function main() {
     process.exit(1);
   }
 
+  // Language setting (default: bilingual)
+  const language = (process.env.DIGEST_LANGUAGE || 'bilingual').toLowerCase();
+  console.error(`Language: ${language}`);
+
   // Support both OpenAI-compatible endpoint (for Vercel proxies) and native Gemini
   const apiHost = process.env.GEMINI_API_HOST || 'https://generativelanguage.googleapis.com';
   const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
@@ -279,7 +321,7 @@ async function main() {
     body = JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: buildSystemPrompt() },
+        { role: 'system', content: buildSystemPrompt(language) },
         { role: 'user', content: buildUserPrompt(data) }
       ],
       temperature: 0.7,
@@ -294,7 +336,7 @@ async function main() {
       contents: [
         {
           role: 'user',
-          parts: [{ text: buildSystemPrompt() + '\n\n---\n\n' + buildUserPrompt(data) }]
+          parts: [{ text: buildSystemPrompt(language) + '\n\n---\n\n' + buildUserPrompt(data) }]
         }
       ],
       generationConfig: {

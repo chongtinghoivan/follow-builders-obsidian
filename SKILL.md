@@ -71,9 +71,11 @@ This is needed for the Obsidian CLI to create the daily note.
 ### Step 4: Language
 
 Ask: "您希望使用什麼語言閱讀摘要？"
+- English only
 - 繁體中文（翻譯自英文來源）
+- Bilingual: English + 繁體中文（雙語對照，每一段都有英文和繁體中文）
 
-**IMPORTANT: Default to Traditional Chinese (繁體中文) as per user's requirement.**
+**IMPORTANT: Default to Bilingual (English + Traditional Chinese) as per user's requirement.**
 
 ### Step 5: Show Sources
 
@@ -236,9 +238,13 @@ Assemble the digest following `prompts.digest_intro`.
 ### Step 5: Apply language
 
 Read `config.language` from the JSON:
-- **"zh":** Entire digest in Traditional Chinese. Follow `prompts.translate`.
+- **"en":** English only
+- **"zh":** Entire digest in Traditional Chinese only. Follow `prompts.translate`.
+- **"bilingual":** Bilingual mode — English + Traditional Chinese interleaved.
+  Every section has English first, then Traditional Chinese below it.
+  Follow `prompts.translate` for the bilingual format.
 
-**IMPORTANT: Default to Traditional Chinese (zh) as per user's requirement.**
+**IMPORTANT: Default to Bilingual as per user's requirement.**
 
 ### Step 6: Deliver to Obsidian
 
