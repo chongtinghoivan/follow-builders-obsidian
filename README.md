@@ -19,7 +19,7 @@ A daily digest at **6:15am HKT** delivered to your Obsidian Vault via **GitHub A
 - Key posts and insights from 25 curated AI builders on X/Twitter
 - Full articles from official AI company blogs (Anthropic Engineering, Claude Blog)
 - Links to all original content
-- Available in Traditional Chinese (繁體中文)
+- Bilingual output: English + Traditional Chinese (繁體中文)
 
 **Why GitHub Actions?** Your MacBook might be sleeping or offline at 6:15am. GitHub
 Actions runs on GitHub' infrastructure — always online. You just `git pull` your vault
@@ -115,8 +115,8 @@ At 6:15am HKT daily, a GitHub Actions workflow runs on GitHub's infrastructure:
 
 1. Clones the follow-builders-obsidian skill repo
 2. Fetches the latest AI builder content from the central feed
-3. Calls OpenAI API to remix and translate to Traditional Chinese
-4. Commits the digest to `AI News Daily/YYYY-MM-DD.md` and `YYYY-MM-DD.md`
+3. Calls Google Gemini API to remix and generate bilingual digest (EN + 繁體中文)
+4. Commits the digest to `AI News Daily/YYYY-MM-DD.md`
 5. Pushes to your vault repo
 
 When your MacBook comes back online, just `git pull` your vault and the digest is waiting.
@@ -148,7 +148,7 @@ Edit the files in the `prompts/` folder:
 - `summarize-tweets.md` — how X/Twitter posts are summarized
 - `summarize-blogs.md` — how blog posts are summarized
 - `digest-intro.md` — the overall digest format and tone
-- `translate.md` — how English content is translated to Traditional Chinese
+- `translate.md` — how the bilingual (EN + 繁體中文) format is produced
 
 These are plain English instructions, not code. Changes take effect on the next digest.
 
