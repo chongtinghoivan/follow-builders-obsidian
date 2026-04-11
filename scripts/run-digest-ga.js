@@ -232,7 +232,7 @@ Do NOT wrap the output in code blocks.`;
 function buildUserPrompt(data) {
   const parts = [];
 
-  parts.push(`Today's date is: ${new Date().toISOString().slice(0, 10)}`);
+  parts.push(`Today's date is: ${new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Hong_Kong' })}`);
   parts.push('');
 
   // Stats
