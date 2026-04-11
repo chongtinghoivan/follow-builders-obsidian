@@ -1,4 +1,4 @@
-[English](README.md) | **中文**
+[English](README.md) | **简体中文** | [繁體中文](README.zh-TW.md)
 
 # 追踪建造者，而非网红（Obsidian 版）
 
